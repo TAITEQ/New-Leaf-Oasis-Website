@@ -1,0 +1,685 @@
+import React, { useEffect, useState, useRef } from "react";
+// Keeping lucide-react icons since they don't impact the canvas preview logic
+import { CheckCircle, HeartHandshake, ShieldCheck, Handshake, Baby, Users, ExternalLink, ChevronRight, MessageCircle } from "lucide-react";
+
+/*
+  New Leaf Oasis – Starter Landing Page (self-contained)
+  -----------------------------------------------------
+  This file removes external UI imports and defines minimal local components
+  (Button, Card, Input, Textarea, etc.) to avoid runtime reference errors in
+  the canvas preview. It also inlines all helper components so nothing is
+  undefined (fixes ReferenceError: HeaderNav is not defined). All statements
+  terminate with semicolons to satisfy the TS parser (fixes "Missing semicolon").
+*/
+
+// ============ Minimal Local UI Primitives (no external deps) ============
+
+type Classable = { className?: string };
+
+function cn(...parts: Array<string | undefined>): string {
+  return parts.filter(Boolean).join(" ");
+}
+
+function Button({ children, className, type = "button", ...props }: React.ButtonHTMLAttributes<HTMLButtonElement> & Classable) {
+  return (
+    <button
+      type={type as any}
+      className={cn(
+        "inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-medium shadow-sm transition active:scale-[.99]",
+        "bg-emerald-600 text-white hover:bg-emerald-700",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2",
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </button>
+  );
+}
+
+function Card({ children, className }: React.PropsWithChildren<Classable>) {
+  return <div className={cn("rounded-2xl border bg-white", className)}>{children}</div>;
+}
+function CardHeader({ children, className }: React.PropsWithChildren<Classable>) {
+  return <div className={cn("p-4 border-b rounded-t-2xl", className)}>{children}</div>;
+}
+function CardTitle({ children, className }: React.PropsWithChildren<Classable>) {
+  return <h3 className={cn("font-semibold text-lg", className)}>{children}</h3>;
+}
+function CardContent({ children, className }: React.PropsWithChildren<Classable>) {
+  return <div className={cn("p-4", className)}>{children}</div>;
+}
+
+function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
+  const { className, ...rest } = props;
+  return (
+    <input
+      className={cn(
+        "w-full rounded-xl border px-3 py-2 text-sm outline-none",
+        "focus:ring-2 focus:ring-emerald-200",
+        className
+      )}
+      {...rest}
+    />
+  );
+}
+
+function Textarea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
+  const { className, ...rest } = props;
+  return (
+    <textarea
+      className={cn(
+        "w-full rounded-xl border px-3 py-2 text-sm outline-none resize-y",
+        "focus:ring-2 focus:ring-emerald-200",
+        className
+      )}
+      {...rest}
+    />
+  );
+}
+
+// ============================= Page Component =============================
+
+export default function NewLeafOasis(): JSX.Element {
+  return (
+    <main id="content" className="min-h-screen bg-neutral-50 text-neutral-900 scroll-smooth">
+      {/* Skip link for accessibility */}
+      <a href="#content-start" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 z-[100] bg-white text-neutral-900 rounded px-3 py-2 shadow">Skip to content</a>
+      <HeaderNav />
+      <Hero />
+      <QuickBadges />
+      <AboutUs />
+      
+
+      <Section id="values" title="Our Core Values">
+        <div className="grid md:grid-cols-3 gap-6">
+          <ValueCard icon={<ShieldCheck className="h-6 w-6" />} title="Safety First" desc="A secure, structured environment where mothers and babies are safeguarded at all times." />
+          <ValueCard icon={<HeartHandshake className="h-6 w-6" />} title="Compassion & Respect" desc="Dignity, empathy, and understanding for every family—support without judgement." />
+          <ValueCard icon={<CheckCircle className="h-6 w-6" />} title="Nurturing Growth" desc="We build skills, confidence, and resilience while supporting baby development." />
+          <ValueCard icon={<Handshake className="h-6 w-6" />} title="Transparency & Trust" desc="Open communication with families and professionals; trust is our foundation." />
+          <ValueCard icon={<Users className="h-6 w-6" />} title="Collaboration" desc="We partner with social services, health teams, and safeguarding agencies." />
+          <ValueCard icon={<Baby className="h-6 w-6" />} title="Empowerment" desc="We support mothers to recognise strengths and make informed, child-centred decisions." />
+        </div>
+      </Section>
+
+      <Section id="services" title="What We Provide">
+        <div className="grid lg:grid-cols-2 gap-6">
+          <ServiceCard title="Safe, Supportive Living" bullets={["Secure, nurturing accommodation for mothers and babies", "Calm, structured routines and positive interactions"]} />
+          <ServiceCard title="Settling-In Period (3 Weeks)" bullets={["Gentle adjustment before formal assessment", "Relationship-building and stabilising routines"]} />
+          <ServiceCard title="Parenting Capacity Assessments" bullets={["Practical care skills, emotional bonding", "Safeguarding awareness and parental insight"]} />
+          <ServiceCard title="Risk & Safeguarding Assessments" bullets={["Identify risks and protective factors", "Environmental safety and stability"]} />
+          <ServiceCard title="Therapeutic Guidance" bullets={["Role-modelling and reflective practice", "Confidence, resilience, and healthy routines"]} />
+          <ServiceCard title="Court-Ready Reports" bullets={["Clear, evidence-based reporting", "Supports care planning and decision-making"]} />
+        </div>
+      </Section>
+
+      <WhyChooseUs />
+
+            <Section id="resources" title="Resources & Support">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <LinkTile label="NSPCC" href="https://www.nspcc.org.uk" />
+          <LinkTile label="Barnardo's" href="https://www.barnardos.org.uk" />
+          <LinkTile label="Childline" href="https://www.childline.org.uk" />
+          <LinkTile label="Report Child Abuse (GOV.UK)" href="https://www.gov.uk/report-child-abuse" />
+          <LinkTile label="Family Lives" href="https://www.familylives.org.uk" />
+          <LinkTile label="Home-Start UK" href="https://www.home-start.org.uk" />
+          <LinkTile label="Action for Children" href="https://www.actionforchildren.org.uk" />
+          <LinkTile label="Mind" href="https://www.mind.org.uk" />
+          <LinkTile label="YoungMinds" href="https://www.youngminds.org.uk" />
+          <LinkTile label="NHS – Mental Health" href="https://www.nhs.uk/mental-health" />
+          <LinkTile label="Refuge" href="https://www.refuge.org.uk" />
+          <LinkTile label="Women's Aid" href="https://www.womensaid.org.uk" />
+        </div>
+      </Section>
+
+      <Section id="complaints" title="Complaints & Compliments">
+        <div className="grid lg:grid-cols-2 gap-6">
+          <Card className="shadow-sm">
+            <CardHeader>
+              <CardTitle>Complaints</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2 text-neutral-700">
+              <p>We acknowledge within 5 working days and aim to respond in full within 28 working days.</p>
+              <ul className="list-disc ml-6 space-y-1">
+                <li>Speak to a staff member or manager</li>
+                <li>Call the office</li>
+                <li>Email <a className="underline" href="mailto:info@newleafoasis.co.uk">info@newleafoasis.co.uk</a></li>
+                <li>Send a written complaint to our office address</li>
+              </ul>
+            </CardContent>
+          </Card>
+          <Card className="shadow-sm">
+            <CardHeader>
+              <CardTitle>Compliments</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-neutral-700">Share positive feedback with our team via email or in writing—this helps us celebrate good practice and keep improving.</p>
+            </CardContent>
+          </Card>
+        </div>
+      </Section>
+
+      <Team /><CTA />
+      <ContactDrawer />
+      <LiveChatWidget />
+      <Footer />
+    </main>
+  );
+}
+
+// ============================= Helper Components =============================
+
+type SectionProps = { id?: string; title: string; children: React.ReactNode };
+function Section({ id, title, children }: SectionProps): JSX.Element {
+  return (
+    <section id={id} className="py-14 scroll-mt-40 md:scroll-mt-48" aria-labelledby={id ? `${id}-title` : undefined}>
+      <div className="max-w-7xl mx-auto px-4">
+        <h2 id={id ? `${id}-title` : undefined} className="text-3xl md:text-4xl font-bold mb-6 tracking-tight">{title}</h2>
+        {children}
+      </div>
+    </section>
+  );
+}
+
+function HeaderNav(): JSX.Element {
+  const [active, setActive] = useState<string>("");
+  const topBarRef = useRef<HTMLDivElement | null>(null);
+  const greenRef = useRef<HTMLDivElement | null>(null);
+  const [topH, setTopH] = useState<number>(0);
+  const [greenH, setGreenH] = useState<number>(0);
+
+  useEffect(() => {
+    const measure = () => {
+      setTopH(topBarRef.current?.offsetHeight || 0);
+      setGreenH(greenRef.current?.offsetHeight || 0);
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, []);
+
+  useEffect(() => {
+    const ids = ["why-us", "values", "resources"];  
+    const obs = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) setActive((e.target as HTMLElement).id);
+        });
+      },
+      { rootMargin: "-30% 0px -60% 0px", threshold: 0.01 }
+    );
+    ids.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) obs.observe(el);
+    });
+    return () => obs.disconnect();
+  }, []);
+
+  const navLink = (id: string) => cn(
+    "text-white/90 hover:text-white",
+    active === id && "text-white font-semibold underline decoration-2 underline-offset-4"
+  );
+
+  return (
+    <header role="banner">
+      {/* Top bar (white) */}
+      <div ref={topBarRef} className="fixed top-0 left-0 right-0 z-40 bg-white border-b">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <span className="h-9 w-9 rounded-2xl bg-emerald-600 flex items-center justify-center text-white font-bold">NL</span>
+            <div>
+              <p className="font-semibold leading-tight">New Leaf Oasis</p>
+              <p className="text-xs text-neutral-500 leading-tight">Where Safety Meets Support</p>
+            </div>
+          </div>
+          <nav className="hidden md:flex items-center gap-6 text-sm" aria-label="Top navigation">
+            <a href="#about" className="hover:underline">About Us</a>
+            <a href="#team" className="hover:underline">The Team</a>
+            <a href="#careers" className="hover:underline">Careers</a>
+            <a href="#login" className="hover:underline">My NLO Login</a>
+          </nav>
+        </div>
+      </div>
+
+      {/* Bottom bar (dark green) */}
+      <div
+        ref={greenRef}
+        style={{ top: topH }}
+        className={cn(
+          "fixed left-0 right-0 z-30 text-white",
+          "bg-gradient-to-b from-emerald-700 to-emerald-800",
+          "shadow-md ring-1 ring-black/10"
+        )}
+      >
+        <div className="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between">
+          <nav className="flex items-center gap-6 text-sm" aria-label="Primary navigation">
+            <a href="#why-us" className={navLink("why-us")} aria-current={active === 'why-us' ? 'page' : undefined}>Why Us</a>
+            <a href="#values" className={navLink("values")} aria-current={active === 'values' ? 'page' : undefined}>Our Values</a>
+            <a href="#resources" className={navLink("resources")} aria-current={active === 'resources' ? 'page' : undefined}>Resources</a>
+            <a href="/referrals" className="text-white/90 hover:text-white inline-flex items-center gap-2">
+              Make a Referral <ExternalLink className="h-4 w-4" />
+            </a>
+          </nav>
+          <button
+            type="button"
+            onClick={() => window.dispatchEvent(new CustomEvent('open-contact'))}
+            className="inline-flex items-center rounded-full border-2 border-white px-4 py-2 text-sm font-bold text-white hover:bg-white hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+          >
+            Contact Us
+          </button>
+        </div>
+      </div>
+
+      {/* Spacer so content starts below both bars */}
+      <div id="content-start" style={{ height: topH + greenH }} aria-hidden />
+    </header>
+  );
+}
+
+
+function Hero(): JSX.Element {
+  return (
+    <section aria-labelledby="hero-title" className="bg-gradient-to-br from-emerald-50/60 to-white">
+      <div className="max-w-7xl mx-auto px-4 pt-8 md:pt-10 pb-8 md:pb-12">
+        <h1 id="hero-title" className="text-4xl md:text-6xl font-extrabold tracking-tight leading-[1.05]">
+          Safe Beginnings, Strong Futures
+        </h1>
+        <p className="mt-4 text-lg md:text-xl text-neutral-700 leading-relaxed max-w-4xl">
+          Residential placement and assessment for young mothers and children, and women leaving
+          domestic abuse—delivered with safeguarding, compassion, and professionalism.
+        </p>
+        <div className="mt-6 flex flex-wrap items-center gap-4">
+          <a
+            href="#services"
+            className="order-2 md:order-1 w-full sm:w-auto justify-center inline-flex items-center gap-2 rounded-2xl px-5 py-2.5 md:py-3 text-base font-semibold bg-white text-emerald-900 border border-emerald-300 shadow-md shadow-emerald-700/10 hover:bg-white hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2"
+          >
+            Explore Services <ChevronRight className="h-4 w-4" />
+          </a>
+          <a
+            href="/referrals"
+            aria-label="Make a referral (priority action)"
+            className="order-1 md:order-2 w-full sm:w-auto justify-center inline-flex items-center gap-2 rounded-2xl px-5 py-2.5 md:py-3 text-base font-semibold text-white bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-700/20 ring-1 ring-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 transition hover:-translate-y-0.5"
+          >
+            Make a Referral <ExternalLink className="h-4 w-4" />
+          </a>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function QuickBadges(): JSX.Element {
+  const items = [
+    { label: "Child-centred", sub: "Safety first" },
+    { label: "Evidence-based", sub: "Court-ready reports" },
+    { label: "Therapeutic", sub: "Support & growth" },
+    { label: "Multi-agency", sub: "LA • Health • Courts" }
+  ];
+  return (
+    <div className="max-w-7xl mx-auto px-4 pb-8 -mt-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {items.map((i) => (
+          <div key={i.label} className="rounded-2xl border bg-white p-3 shadow-sm">
+            <p className="font-semibold text-sm">{i.label}</p>
+            <p className="text-xs text-neutral-500">{i.sub}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+type ValueCardProps = { icon: React.ReactNode; title: string; desc: string };
+function ValueCard({ icon, title, desc }: ValueCardProps): JSX.Element {
+  return (
+    <Card className="shadow-sm">
+      <CardHeader className="flex gap-3 items-center">
+        <div className="rounded-2xl bg-emerald-600/10 p-2 text-emerald-700">{icon}</div>
+        <CardTitle className="text-lg">{title}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="text-neutral-700 text-sm">{desc}</p>
+      </CardContent>
+    </Card>
+  );
+}
+
+type ServiceCardProps = { title: string; bullets: string[] };
+function ServiceCard({ title, bullets }: ServiceCardProps): JSX.Element {
+  return (
+    <Card className="shadow-sm">
+      <CardHeader>
+        <CardTitle className="text-lg">{title}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <ul className="list-disc ml-5 space-y-1 text-neutral-700 text-sm">
+          {bullets.map((b) => (
+            <li key={b}>{b}</li>
+          ))}
+        </ul>
+      </CardContent>
+    </Card>
+  );
+}
+
+function WhyChooseUs(): JSX.Element {
+  const points = [
+    { title: "Experienced, Qualified Leadership", desc: "Led by highly qualified social workers with decades of frontline practice in safeguarding and assessment." },
+    { title: "Child-Centred Practice", desc: "The welfare, safety, and development of children are at the centre of every decision and assessment." },
+    { title: "Therapeutic, Fair, Evidence-Based", desc: "Balanced support with rigorous, transparent assessments and court-ready reports." },
+    { title: "Strong Partnerships", desc: "Close collaboration with local authorities, health professionals, and safeguarding networks." }
+  ];
+  return (
+    <Section id="why-us" title="Why Choose New Leaf Oasis?">
+      <div className="grid md:grid-cols-2 gap-6">
+        {points.map((p) => (
+          <Card key={p.title} className="shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-lg">{p.title}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-neutral-700 text-sm">{p.desc}</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+type LinkTileProps = { label: string; href: string };
+function LinkTile({ label, href }: LinkTileProps): JSX.Element {
+  return (
+    <a href={href} target="_blank" rel="noreferrer" className="group rounded-2xl border p-4 bg-white shadow-sm flex items-center justify-between hover:shadow">
+      <span className="font-medium">{label}</span>
+      <ExternalLink className="h-4 w-4 opacity-50 group-hover:opacity-100" />
+    </a>
+  );
+}
+
+function AboutUs(): JSX.Element {
+  return (
+    <Section id="about" title="About Us">
+      <p className="text-neutral-700 max-w-3xl">New Leaf Oasis provides safe, supportive residential placements for young mothers and children and for women leaving domestic abuse while assessments are completed. We partner closely with local authorities and health teams to deliver therapeutic support and clear, evidence-based reporting.</p>
+    </Section>
+  );
+}
+
+function CareersSection(): JSX.Element {
+  return (
+    <Section id="careers" title="Careers">
+      <div className="grid md:grid-cols-2 gap-4 text-neutral-700">
+        <Card className="shadow-sm"><CardHeader><CardTitle>Residential Support Workers</CardTitle></CardHeader><CardContent><p className="text-sm">Compassionate, child-centred practice. Rotas include day and night shifts. Email CV to <a className="underline" href="mailto:info@newleafoasis.co.uk">info@newleafoasis.co.uk</a>.</p></CardContent></Card>
+        <Card className="shadow-sm"><CardHeader><CardTitle>Qualified Social Workers</CardTitle></CardHeader><CardContent><p className="text-sm">Assessment-focused roles (e.g., PAMS/ParentAssess). Court-ready reporting experience is a plus. Email <a className="underline" href="mailto:info@newleafoasis.co.uk">info@newleafoasis.co.uk</a>.</p></CardContent></Card>
+      </div>
+    </Section>
+  );
+}
+
+
+function Team(): JSX.Element {
+  return (
+    <Section id="team" title="Our Team">
+      <div className="grid lg:grid-cols-2 gap-6">
+        <Card className="shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-lg">Angela C. Mareverwa – Social Work Leader</CardTitle>
+          </CardHeader>
+          <CardContent className="text-neutral-700 text-sm space-y-2">
+            <p>20+ years across Health & Social Care and Social Work, with deep experience in child protection, courts, and multi-agency practice. Leads quality assurance and robust, child-centred assessments.</p>
+          </CardContent>
+        </Card>
+        <Card className="shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-lg">Gertrude Chulu – Senior Social Worker</CardTitle>
+          </CardHeader>
+          <CardContent className="text-neutral-700 text-sm space-y-2">
+            <p>Two decades supporting children (0–18) and extensive work with adults. Qualified teacher (BA Education & English) and MA Social Work. Skilled in PAMS, ParentAssess, and Cubas assessments.</p>
+          </CardContent>
+        </Card>
+      </div>
+    </Section>
+  );
+}
+
+function CTA(): JSX.Element {
+  return (
+    <section id="contact" className="py-16">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="rounded-3xl bg-emerald-700 text-white p-8 md:p-12 grid lg:grid-cols-3 gap-8 items-center">
+          <div className="lg:col-span-2">
+            <h3 className="text-2xl md:text-3xl font-bold">Ready to refer or have questions?</h3>
+            <p className="mt-2 text-emerald-50">We're here to help—reach out for placements, assessments, or a conversation about how we work.</p>
+          </div>
+          <div className="flex gap-3">
+            <a href="mailto:info@newleafoasis.co.uk" className="inline-flex items-center rounded-2xl px-4 py-2 text-sm font-medium bg-white text-emerald-800 hover:bg-white/90">Email Us</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Footer(): JSX.Element {
+  return (
+    <footer className="border-t">
+      <div className="max-w-7xl mx-auto px-4 py-10 grid md:grid-cols-2 lg:grid-cols-4 gap-6 text-sm">
+        <div>
+          <p className="font-semibold">New Leaf Oasis</p>
+          <p className="text-neutral-600 mt-2">Where Safety Meets Support</p>
+        </div>
+        <div>
+          <p className="font-semibold">Contact</p>
+          <ul className="mt-2 space-y-1 text-neutral-600">
+            <li><a className="underline" href="mailto:info@newleafoasis.co.uk">info@newleafoasis.co.uk</a></li>
+            <li>+44 (0)1234 567 890</li>
+            <li>Registered in England & Wales</li>
+          </ul>
+        </div>
+        <div>
+          <p className="font-semibold">Quick Links</p>
+          <ul className="mt-2 space-y-1 text-neutral-600">
+            <li><a href="#services" className="hover:underline">Services</a></li>
+            <li><a href="/referrals" className="hover:underline">Referrals</a></li>
+            <li><a href="#resources" className="hover:underline">Resources</a></li>
+            <li><a href="#complaints" className="hover:underline">Complaints</a></li>
+          </ul>
+        </div>
+        <div>
+          <p className="font-semibold">Affiliations</p>
+          <p className="text-neutral-600 mt-2">ICO • BASW • NSPCC • Barnardo's</p>
+        </div>
+      </div>
+      <div className="text-center text-xs text-neutral-500 pb-6">© {new Date().getFullYear()} New Leaf Oasis. All rights reserved.</div>
+    </footer>
+  );
+}
+
+
+// --- Slide-in Contact Drawer (accessible) ---
+function ContactDrawer(): JSX.Element {
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    const openHandler = () => setOpen(true);
+    const escHandler = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
+    window.addEventListener('open-contact', openHandler as any);
+    window.addEventListener('keydown', escHandler);
+    return () => {
+      window.removeEventListener('open-contact', openHandler as any);
+      window.removeEventListener('keydown', escHandler);
+    };
+  }, []);
+
+  return (
+    <div aria-hidden={!open}>
+      {/* backdrop */}
+      <button
+        aria-label="Close contact panel"
+        onClick={() => setOpen(false)}
+        className={cn(
+          'fixed inset-0 z-[60] bg-black/40 transition-opacity',
+          open ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        )}
+      />
+      {/* panel */}
+      <aside
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="contact-panel-title"
+        className={cn(
+          'fixed top-0 right-0 h-full w-full max-w-md z-[61] bg-white shadow-2xl',
+          'transition-transform duration-300',
+          open ? 'translate-x-0' : 'translate-x-full'
+        )}
+      >
+        <div className="p-6 space-y-4">
+          <div className="flex items-start justify-between">
+            <h2 id="contact-panel-title" className="text-xl font-bold">Contact Us</h2>
+            <button aria-label="Close" onClick={() => setOpen(false)} className="rounded-md p-2 hover:bg-neutral-100 focus-visible:ring-2 focus-visible:ring-emerald-400">✕</button>
+          </div>
+          <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); alert('Message sent (demo)'); setOpen(false); }}>
+            <Input required placeholder="Your name" aria-label="Your name" />
+            <Input required type="email" placeholder="Your email" aria-label="Your email" />
+            <Textarea rows={4} placeholder="How can we help?" aria-label="How can we help?" />
+            <Button type="submit" className="rounded-2xl w-full">Send</Button>
+            <p className="text-xs text-neutral-500">Or email <a className="underline" href="mailto:info@newleafoasis.co.uk">info@newleafoasis.co.uk</a></p>
+          </form>
+        </div>
+      </aside>
+    </div>
+  );
+}
+
+// --- Live Chat Widget (launcher + drawer; replace with vendor later) ---
+function LiveChatWidget(): JSX.Element {
+  // Choose launcher style: 'pill' | 'avatar'
+  const launcherStyle: 'pill' | 'avatar' = 'pill';
+  // Optional agent avatar (set to an image URL to show an avatar bubble)
+  const agentAvatarUrl: string | null = null; // e.g. "https://example.com/agent.jpg"
+
+  const [open, setOpen] = useState(false);
+  const [draft, setDraft] = useState("");
+  const [messages, setMessages] = useState<Array<{ id: number; from: "agent" | "user"; text: string }>>([
+    { id: 1, from: "agent", text: "Hello — how can we help today? Please avoid sharing sensitive details here." },
+  ]);
+
+  useEffect(() => {
+    const openHandler = () => setOpen(true);
+    window.addEventListener("open-chat", openHandler as any);
+    return () => window.removeEventListener("open-chat", openHandler as any);
+  }, []);
+
+  const send = (e: React.FormEvent) => {
+    e.preventDefault();
+    const t = draft.trim();
+    if (!t) return;
+    setMessages((prev) => [...prev, { id: Date.now(), from: "user", text: t }]);
+    setDraft("");
+    setTimeout(() => {
+      setMessages((prev) => [
+        ...prev,
+        { id: Date.now() + 1, from: "agent", text: "Thanks — a member of our team will reply shortly." },
+      ]);
+    }, 500);
+  };
+
+  // Common launcher positioning: bottom-right, off the text flow
+  const launcherPos = "fixed bottom-6 right-6 z-[70]";
+
+  return (
+    <div>
+      {/* Desktop & Mobile launcher (brand emerald) */}
+      {launcherStyle === 'pill' ? (
+        <button
+          aria-label="Open live chat"
+          onClick={() => setOpen(true)}
+          className={cn(
+            launcherPos,
+            "shadow-lg rounded-full bg-emerald-700 hover:bg-emerald-800 text-white",
+            "px-4 h-12 inline-flex items-center gap-2 font-semibold"
+          )}
+        >
+          <MessageCircle className="h-5 w-5" />
+          <span className="hidden sm:inline">Chat</span>
+        </button>
+      ) : (
+        <button
+          aria-label="Open live chat"
+          onClick={() => setOpen(true)}
+          className={cn(launcherPos, "flex flex-col items-center gap-1")}
+        >
+          <span className="relative inline-flex items-center justify-center h-14 w-14 rounded-full shadow-lg ring-2 ring-white bg-emerald-700 overflow-hidden">
+            {agentAvatarUrl ? (
+              <img src={agentAvatarUrl} alt="Online agent" className="h-full w-full object-cover" />
+            ) : (
+              <MessageCircle className="h-7 w-7 text-white" />
+            )}
+            <span className="absolute right-0.5 top-0.5 h-3 w-3 rounded-full bg-emerald-400 ring-2 ring-white" aria-hidden />
+          </span>
+          <span className="px-2 py-0.5 rounded-full bg-neutral-900/80 text-white text-[10px] leading-none">Online Agent</span>
+        </button>
+      )}
+
+      {/* Backdrop */}
+      <button
+        aria-label="Close chat"
+        onClick={() => setOpen(false)}
+        className={cn(
+          "fixed inset-0 z-[64] bg-black/40 transition-opacity",
+          open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        )}
+      />
+
+      {/* Drawer */}
+      <aside
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="chat-title"
+        className={cn(
+          "fixed top-0 right-0 h-full w-full max-w-md z-[65] bg-white shadow-2xl",
+          "transition-transform duration-300",
+          open ? "translate-x-0" : "translate-x-full"
+        )}
+      >
+        <div className="p-4 border-b flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-emerald-700 text-white"><MessageCircle className="h-4 w-4" /></span>
+            <h2 id="chat-title" className="text-lg font-semibold">Live Chat</h2>
+          </div>
+          <button onClick={() => setOpen(false)} aria-label="Close" className="rounded-md p-2 hover:bg-neutral-100">✕</button>
+        </div>
+
+        <div className="p-4 space-y-3 h-[calc(100%-8rem)] flex flex-col">
+          <div className="text-xs text-neutral-500">Please avoid sharing confidential or identifying information here. For emergencies, call 999.</div>
+          <div className="flex-1 overflow-y-auto space-y-2 pr-1">
+            {messages.map((m) => (
+              <div
+                key={m.id}
+                className={cn(
+                  "max-w-[80%] rounded-2xl px-3 py-2 text-sm",
+                  m.from === "user" ? "ml-auto bg-emerald-600 text-white" : "bg-neutral-100 text-neutral-800"
+                )}
+              >
+                {m.text}
+              </div>
+            ))}
+          </div>
+          <form onSubmit={send} className="flex gap-2">
+            <Input
+              value={draft}
+              onChange={(e) => setDraft(e.currentTarget.value)}
+              placeholder="Type your message…"
+              aria-label="Type your message"
+              className="flex-1"
+            />
+            <Button type="submit" className="rounded-xl">Send</Button>
+          </form>
+        </div>
+      </aside>
+    </div>
+  );
+}
+
+
+// Additional developer notes removed here to keep the file compact for the canvas.
